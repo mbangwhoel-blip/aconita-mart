@@ -1,58 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Aconita Mart - Backend & Web Admin Koperasi
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem Manajemen Toko Koperasi & Retail POS Backend untuk **Aconita Mart**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## ??? Tech Stack
+- **Framework**: Laravel 13.x
+- **Admin Panel**: Filament v5.10.x
+- **Reactive UI**: Livewire v4.4.x
+- **Database**: MySQL 8.0 (Database: `aconita_mart`)
+- **API Authentication**: Laravel Sanctum (Bearer Token)
+- **Environment**: Laragon Windows
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## ?? Kredensial Login Bawaan
 
-## Learning Laravel
+### 1. Web Admin (Filament Panel)
+- **URL Admin**: `http://aconita-mart.test/admin` atau `http://localhost:8000/admin`
+- **Email**: `admin@aconitamart.com`
+- **Password**: `admin123`
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### 2. Akun Kasir (POS)
+- **Email**: `kasir@aconitamart.com`
+- **Password**: `kasir123`
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## ?? Fitur Backend & Filament Resources
 
-## Agentic Development
+1. **Dashboard Overview**:
+   - Widget Omset Hari Ini
+   - Widget Estimasi Laba Kotor / SHU Bulan Ini
+   - Widget Total Anggota Aktif
+   - Widget Peringatan Stok Menipis
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+2. **Master Data**:
+   - **Kategori Barang** (`/admin/categories`): Pengelompokan sembako, minuman, snack, dll.
+   - **Produk & Stok** (`/admin/products`): SKU, Barcode, HPP/Harga Beli, Harga Jual Umum, Harga Anggota, Stok & Min Stok.
+   - **Supplier** (`/admin/suppliers`): Manajemen pemasok kulakan.
+   - **Anggota Koperasi** (`/admin/members`): NIK, Nomor Anggota, Saldo Simpanan Belanja, Limit Kasbon/Kredit.
 
+3. **Operasional & Transaksi**:
+   - **Pembelian / Restock** (`/admin/purchases`): Pencatatan faktur kulakan dari supplier.
+   - **Penjualan / POS Orders** (`/admin/orders`): Transaksi kasir (Tunai, QRIS, Transfer, Potong Simpanan Anggota, Bon/Kredit).
+   - **Alokasi SHU** (`/admin/shu-allocations`): Perhitungan sisa hasil usaha tahunan berdasarkan laba kotor.
+
+---
+
+## ?? REST API Endpoints (Untuk Integrasi Mobile Kasir Flutter)
+
+Base URL: `http://localhost:8000/api` atau `http://aconita-mart.test/api`
+
+### 1. Autentikasi
+- `POST /api/login` (Body: `email`, `password`) -> Mengembalikan user info & Bearer Token.
+- `GET /api/me` (Header: `Authorization: Bearer {token}`) -> Info profil user.
+- `POST /api/logout` (Header: `Authorization: Bearer {token}`) -> Revoke token.
+
+### 2. Produk & Barcode
+- `GET /api/products` -> Daftar semua produk aktif (bisa filter `search` & `category_id`).
+- `GET /api/products/barcode/{barcode}` -> Pencarian produk instan dengan scan barcode.
+
+### 3. Anggota Koperasi
+- `GET /api/members` -> Daftar anggota aktif.
+- `GET /api/members/{id}` -> Detail anggota (termasuk sisa saldo simpanan belanja & limit kasbon).
+
+### 4. Transaksi Kasir
+- `GET /api/orders` -> Riwayat transaksi penjualan.
+- `POST /api/orders` -> Simpan transaksi POS baru:
+  - Otomatis potong stok produk.
+  - Jika metode bayar `potong_simpanan`, otomatis debet saldo simpanan anggota dan mencatat mutasi.
+  - Otomatis menghitung laba kotor transaksi untuk kalkulasi SHU.
+
+### 5. Sinkronisasi Offline POS
+- `GET /api/sync/down` -> Unduh katalog produk & anggota untuk disimpan di SQLite HP.
+- `POST /api/sync/up` -> Kirim antrian transaksi offline yang terkumpul saat HP tanpa koneksi.
+
+---
+
+## ?? Cara Menjalankan Server
+
+Jika menggunakan Laragon:
+- Buka Laragon -> Klik **Start All** (Apache/Nginx & MySQL).
+- Akses langsung di browser: `http://aconita-mart.test/admin`
+
+Atau via command line:
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd C:\laragon\www\aconita-mart
+php artisan serve
+# Akses: http://localhost:8000/admin
 ```
-
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
